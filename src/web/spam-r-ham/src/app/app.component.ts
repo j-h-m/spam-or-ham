@@ -1,5 +1,7 @@
 import { Component } from '@angular/core';
 import { PredictionService } from '../services/prediction.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { ResultDialogComponent } from './result-dialog/result-dialog.component';
 
 @Component({
   selector: 'app-root',
@@ -11,15 +13,24 @@ export class AppComponent {
   emailText = '';
   predictResult = '';
 
-  constructor(private predictionService: PredictionService) { }
+  constructor(private snackBar: MatSnackBar,
+    private predictionService: PredictionService) { }
 
   submitEmailText() {
-    this.logEvent(this.emailText);
     const result = this.predictionService.getPrediction(this.emailText)
       .subscribe((res) => {
-        this.logEvent(res);
-        this.predictResult = res;
+        const data = `Confidence: ${res.confidence}, Is Spam? ${res.isSpam}`;
+        this.showResultSnackBar(data);
       });
+  }
+
+  showResultSnackBar(data: string) {
+    this.snackBar.openFromComponent(ResultDialogComponent, {
+      duration: 3 * 1000,
+      horizontalPosition: 'center',
+      verticalPosition: 'bottom',
+      data: data
+    });
   }
 
   clearEmailText() {

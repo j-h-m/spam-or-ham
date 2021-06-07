@@ -3,6 +3,7 @@ import { environment } from '../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { HttpHeaders } from '@angular/common/http';
+import { Result } from 'src/models/result';
 
 @Injectable({
   providedIn: 'root'
@@ -14,14 +15,14 @@ export class PredictionService {
     this.apiUrl = environment.api;
   }
 
-  getPrediction(text: string): Observable<any> {
+  getPrediction(text: string): Observable<Result> {
     const httpOptions = {
       headers: new HttpHeaders({
         'Context-Type': 'application/json'
       })
     };
 
-    return this.http.post(this.apiUrl, {
+    return this.http.post<Result>(this.apiUrl, {
       'text': text
     }, httpOptions);
   }

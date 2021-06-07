@@ -2,15 +2,16 @@ from flask import Flask
 from flask import jsonify
 from flask import request
 from flask_cors import CORS
-import tensorflow as tf
-import keras
-from keras.models import load_model
+from lib import Predictor
 
-model_h5_path = './ml/spam_or_ham.h5'
+
 app = Flask(__name__)
 CORS(app)
-model = load_model(model_h5_path)
-print('model loaded...')
+
+model_h5_path = './ml/spam_or_ham.h5'
+stopwords_path = './ml/stopwords.pkl'
+tokenizer_path = './ml/tokenizer.json'
+predictor = Predictor(model_h5_path, stopwords_path, tokenizer_path)
 
 @app.route('/')
 def home():
@@ -22,8 +23,11 @@ def home():
 @app.route('/api/predict', methods=['POST'])
 def predict():
     if request.method == 'POST':
-        return jsonify(model.predict(request.json))
-        # return jsonify("you sent: " + str(request.json))
+        emailText = request.json['text']
+        result = predictor.computePrediction(emailText)
+        return jsonify({
+            'isSpam': str(True if float(result) > 0.5 else False),
+            'confidence': str(result)
+        })
     else:
-        return "error"
-
+        return jsonify("error")
